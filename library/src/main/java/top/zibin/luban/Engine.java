@@ -33,14 +33,22 @@ class Engine {
     this.srcHeight = options.outHeight;
   }
 
+  /**
+   *  主要是用来计算图片的宽和高的对比，来制定缩放的比例
+   * @return
+   */
   private int computeSize() {
+    //宽和高只能是偶数
     srcWidth = srcWidth % 2 == 1 ? srcWidth + 1 : srcWidth;
     srcHeight = srcHeight % 2 == 1 ? srcHeight + 1 : srcHeight;
 
+    //得到宽和高最大的值
     int longSide = Math.max(srcWidth, srcHeight);
+    //各到宽和高最小的值
     int shortSide = Math.min(srcWidth, srcHeight);
-
+    //计算出图版的宽和高的比例
     float scale = ((float) shortSide / longSide);
+    //宽和高相差比例不是很大的情况
     if (scale <= 1 && scale > 0.5625) {
       if (longSide < 1664) {
         return 1;
@@ -51,9 +59,13 @@ class Engine {
       } else {
         return longSide / 1280 == 0 ? 1 : longSide / 1280;
       }
-    } else if (scale <= 0.5625 && scale > 0.5) {
+    }
+    //宽和高误差相近一倍的情况
+    else if (scale <= 0.5625 && scale > 0.5) {
       return longSide / 1280 == 0 ? 1 : longSide / 1280;
-    } else {
+    }
+    //相差小于一倍的情况
+    else {
       return (int) Math.ceil(longSide / (1280.0 / scale));
     }
   }
@@ -68,6 +80,7 @@ class Engine {
 
   File compress() throws IOException {
     BitmapFactory.Options options = new BitmapFactory.Options();
+    //设置压缩的尺寸，值为2的幂次方，如果为1表示不压缩
     options.inSampleSize = computeSize();
 
     Bitmap tagBitmap = BitmapFactory.decodeStream(srcImg.open(), null, options);
